@@ -320,6 +320,6 @@ func Finterface() {
 }
 
 /*
-不同类型的局部和全局变量默认值为：int=0 float32=0 pointer=nil,string=空格
+不同类型的局部和全局变量默认值为：int=0 float32=0 pointer=nil,string=空格 
 
 */
