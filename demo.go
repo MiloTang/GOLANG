@@ -1,8 +1,12 @@
-//包声明
+//包声明,程序运行的入口是包 main
 package main
 
 //引入包
-import "fmt"
+import (
+	"fmt"
+	"runtime"
+	"time"
+)
 
 //函数外定义的变量称为全局变量
 
@@ -60,8 +64,9 @@ var (
 	vertu    = Mobile{"Vertu", 100000.00, "电信"}
 	huaweip8 = Mobile{"化为P8", 3000.00, "移动"}
 
-	//Channel 类型
-
+	//channel 可以是 带缓冲的。为 make 提供第二个参数作为缓冲长度来初始化一个缓冲
+	ch1 = make(chan int)
+	ch2 = make(chan int, 2)
 	//函数类型
 	func1 FuncT
 
@@ -143,41 +148,6 @@ const (
 	var32
 )
 
-//入口函数
-func main() {
-
-	//函数内定义的变量称为局部变量
-
-	//变量名 := 值，出现在:=左侧的变量不应该是已经被声明过的，否则会导致编译错误，这种不带声明格式的只能在函数体中出现
-	var1 = "golang"
-	var4 := "begin"
-	fmt.Println("begin")
-	var34 = &var1
-	println(var1, var2, var3, var4, var25[0], var26[0], Monday)
-	println(var27, var28, var29, var30, var31, var32)
-	Fpointer()
-	amen.name = "milo"
-	amen.age = 20
-	amen.sex = "男"
-	amen.height = 1.92
-	agirl := Persons{"meta", 11, "女", 1.70}
-	Fstruct(amen)
-	Fstruct(agirl)
-	Fstruct(aboby)
-	Fslice(slice1)
-	slice1 = []int{0, 1, 2, 3, 4, 5, 6, 7, 8}
-	Fslice(slice1)
-	slice1 = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	Fslice(slice1)
-	FRange()
-	FMap()
-	Ffunc()
-	fmt.Println(Frecursion(10))
-	Finterface()
-	fmt.Println("end")
-
-}
-
 //函数定义中的变量称为形式参数
 func Fslice(sl []int) {
 	if sl == nil {
@@ -212,7 +182,12 @@ func Fpointer() {
 		*var34指针指向的值
 		&var34指针的存储地址
 	*/
-	println(var23, var33, &var1, var34, *var34, &var34)
+	var govar = 100
+	var point *int
+	println("指针相关", var23, var33, &var1, var34, *var34, &var34, govar, point)
+	point = &govar
+	*point = 200
+	fmt.Println(*point, point, govar)
 }
 
 func FRange() {
@@ -248,6 +223,8 @@ func FMap() {
 	for province, city := range map1 {
 		println(province, "==>", city)
 	}
+	c, ok := map2["贵州"]
+	fmt.Println("The :", c, "City?", ok)
 
 }
 
@@ -320,6 +297,180 @@ func Finterface() {
 }
 
 /*
-不同类型的局部和全局变量默认值为：int=0 float32=0 pointer=nil,string=空格 
+不同类型的局部和全局变量默认值为：int=0 float32=0 pointer=nil,string=空格
 
 */
+func Finit() {
+	var i int
+	var f float64
+	var b bool
+	var s string
+	var by byte
+	fmt.Printf("%v %v %v %q %v\n", i, f, b, s, by)
+}
+
+//返回多个值
+func Freturn(str1, str2 string) (string, string, int) {
+	return str2, str1, 2017
+}
+
+func Fconvert() {
+	f := 22.22
+	u := uint(f)
+	fmt.Println(f, u)
+}
+func Ffor() {
+	sum := 0
+	for i := 0; i < 10; i++ {
+		sum += i
+	}
+	fmt.Println(sum)
+	sum = 1
+	for sum < 1000 {
+		sum += sum
+	}
+	fmt.Println(sum)
+}
+
+func Fif(x int) {
+	//if 语句也不要求用 ( ) 将条件括起来
+	if x < 100 {
+		fmt.Println(x * 10)
+	} else {
+		fmt.Println(x)
+	}
+	//if 语句可以在条件之前执行一个简单语句,在 if 的便捷语句定义的变量同样可以在任何对应的 else 块中使用。
+	if v := x * 10; v < 10000 {
+		fmt.Println("值太小了")
+	} else {
+		fmt.Println(v)
+	}
+
+}
+
+func Fswicth() {
+	switch os := runtime.GOOS; os {
+	case "darwin":
+		fmt.Println("OS X")
+	case "linux":
+		fmt.Println("Linux")
+	default:
+		fmt.Printf("%s", os)
+	}
+	fmt.Println(runtime.GOROOT())
+	t := time.Now()
+	switch {
+	case t.Hour() < 12:
+		fmt.Println("Good morning!", t)
+	case t.Hour() < 17:
+		fmt.Println("Good afternoon.", t)
+	default:
+		fmt.Println("Good evening.", t)
+	}
+}
+func Fdefer() {
+	defer fmt.Println("done")
+	for i := 0; i < 10; i++ {
+		defer fmt.Println(i)
+	}
+	defer fmt.Print(" world\n")
+	fmt.Print("hello ")
+}
+func FstructPoint() {
+	p := &aboby
+	fmt.Println(aboby)
+	p.age = 20
+	fmt.Println(*p, aboby, &*p, &aboby, &p)
+
+}
+
+//函数可以是一个闭包。闭包是一个函数值，它引用了函数体之外的变量
+func FprivateFunc() func(int) int {
+	sum := 0
+	return func(x int) int {
+		sum += x
+		return sum
+	}
+}
+func (m Mobile) Fstructclass(version string, price float32, nettype string) Mobile {
+	m.version = version
+	m.price = price
+	m.nettype = nettype
+	return m
+}
+func (m *Mobile) FpointParams(discount float32) {
+	m.price = m.price * discount
+}
+
+//goroutine 是由 Go 运行时环境管理的轻量级线程
+func Fgoroutine(s string) {
+	for i := 0; i < 10; i++ {
+		time.Sleep(100 * time.Millisecond)
+		fmt.Println(s, "goroutine", i)
+	}
+}
+func Fchanel(num int) {
+	ch1 <- num
+	ch2 <- num - 1
+}
+
+//入口函数
+func main() {
+
+	//函数内定义的变量称为局部变量
+
+	//变量名 := 值，出现在:=左侧的变量不应该是已经被声明过的，否则会导致编译错误，这种不带声明格式的只能在函数体中出现
+	var1 = "golang"
+	var4 := "begin"
+	fmt.Println("begin")
+	var34 = &var1
+	println(var1, var2, var3, var4, var25[0], var26[0], Monday)
+	println(var27, var28, var29, var30, var31, var32)
+	Fpointer()
+	amen.name = "milo"
+	amen.age = 20
+	amen.sex = "男"
+	amen.height = 1.92
+	agirl := Persons{"meta", 11, "女", 1.70}
+	Fstruct(amen)
+	Fstruct(agirl)
+	Fstruct(aboby)
+	Fslice(slice1)
+	slice1 = []int{0, 1, 2, 3, 4, 5, 6, 7, 8}
+	Fslice(slice1)
+	slice1 = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	Fslice(slice1)
+	FRange()
+	FMap()
+	Ffunc()
+	fmt.Println(Frecursion(10))
+	Finterface()
+	fmt.Println(Freturn("wolrd", "hello"))
+	Finit()
+	Fconvert()
+	Ffor()
+	Fif(200)
+	Fswicth()
+	Fdefer()
+	FstructPoint()
+	gosum := FprivateFunc()
+	for i := 0; i < 10; i++ {
+		fmt.Println(gosum(i))
+	}
+	m := new(Mobile)
+	fmt.Println(m.Fstructclass("诺基亚999", 9999, "移动"))
+	m2 := &Mobile{"小米", 1000, "电信"}
+	fmt.Println(*m2)
+	m2.FpointParams(0.8)
+	fmt.Println(*m2)
+	go Fgoroutine("is ")
+	Fgoroutine("not is ")
+	go Fchanel(100)
+	go Fchanel(200)
+	go Fchanel(300)
+	go Fchanel(400)
+	fmt.Println(<-ch1, <-ch1, <-ch1, <-ch1)
+	fmt.Println(<-ch2, <-ch2, <-ch2, <-ch2)
+	fmt.Println("end")
+
+}
