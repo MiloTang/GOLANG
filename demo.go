@@ -474,3 +474,23 @@ func main() {
 	fmt.Println("end")
 
 }
+
+/*
+GOPATH(bin,src,pkg)src go代码install的地方，pkg go代码install之后存放的地方，可以允许多个GOPATH存在
+GOBIN 可执行的main pakage go代码install存放的地方
+GOROOT go安装目录
+go语言有一个获取远程包的工具就是 go get
+go build这个命令主要用于编译代码。在包的编译过程中，若有必要，会同时编译与之相关联的包。
+当你执行 go build 之后，它不会产生任何文件。如果你需要在 $GOPATH/pkg 下生
+成相应的文件，那就得执行 go install 。
+go clean这个命令是用来移除当前源码包和关联源码包里面编译生成的文件。
+go fmt格式化代码
+go test执行这个命令，会自动读取源码目录下面名为 *_test.go 的文件，生成并运行测试用的可执行文件。
+go tool
+go generate这个命令是从Go1.4开始才设计的，用于在编译前自动化生成某类代码。
+go version 查看go当前的版本
+go env 查看当前go的环境变量
+go list 列出当前全部安装的package
+go run 编译并运行Go程序
+
+*/
