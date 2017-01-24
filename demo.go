@@ -3,6 +3,7 @@ package main
 
 //引入包
 import (
+	"errors"
 	"fmt"
 	"runtime"
 	"time"
@@ -413,6 +414,23 @@ func Fchanel(num int) {
 	ch1 <- num
 	ch2 <- num - 1
 }
+func Fstrings() {
+	instr := `hello
+				world`
+	instr2 := instr + "2017"
+	instr3 := "aAhello world"
+	c := []byte(instr3)
+	c[7] = '>'
+	instr4 := "够浪阿"
+	c2 := []byte(instr4)
+	fmt.Println(instr, "\n", instr2, "\n", instr3, "\n", c, "\n", string(c), c2)
+}
+func Ferror() {
+	err := errors.New("gou lang\n")
+	if err != nil {
+		fmt.Print(err)
+	}
+}
 
 //入口函数
 func main() {
@@ -471,6 +489,8 @@ func main() {
 	go Fchanel(400)
 	fmt.Println(<-ch1, <-ch1, <-ch1, <-ch1)
 	fmt.Println(<-ch2, <-ch2, <-ch2, <-ch2)
+	Fstrings()
+	Ferror()
 	fmt.Println("end")
 
 }
@@ -493,4 +513,9 @@ go env 查看当前go的环境变量
 go list 列出当前全部安装的package
 go run 编译并运行Go程序
 
+Go之所以会那么简洁，是因为它有一些默认的行为：
+大写字母开头的变量是可导出的，也就是其它包可以读取的，是公用变量；小写字母开头的就是不可导出的，是私有变量。
+大写字母开头的函数也是一样，相当于 class 中的带 public 关键词的公有
+函数；小写字母开头的就是有 private 关键词的私有函数。
+make 用于内建类型（ map 、 slice 和 channel ）的内存分配。 new 用于各种类型的内存分配。
 */
