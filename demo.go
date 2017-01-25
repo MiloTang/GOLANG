@@ -5,8 +5,17 @@ package main
 import (
 	"errors"
 	"fmt"
+	/*也可写成. "fmt"省略前缀的包名，调用的时候fmt.Println("hello world")可以写成Println("hello world")
+	P "fmt" 调用时P.Println("hello world")
+	_ "fmt" _操作其实是引入该包，而不直接使用包里面的函数，而是调用了该包里面的init函数。
+	*/
+	"math"
 	"runtime"
 	"time"
+	/*上面这个fmt是Go语言的标准库，其实是去 GOROOT 环境变量指定目录下去加载该
+	模块，当然Go的import还支持如下两种方式来加载自己写的模块：*/
+	//相对路径import "./model"当前文件同一目录的model目录
+	//绝对路径import "model" 加载gopath/src/model模块
 )
 
 //函数外定义的变量称为全局变量
@@ -110,6 +119,19 @@ type Mobile struct {
 	version string
 	price   float32
 	nettype string
+}
+type Human struct {
+	name   string
+	age    int
+	weight int
+}
+type Student struct {
+	Human      // 匿名字段，那么默认Student就包含了Human的所有字段
+	speciality string
+}
+type Employee struct {
+	Human   //匿名字段
+	company string
 }
 
 //函数类型
@@ -298,16 +320,28 @@ func Finterface() {
 }
 
 /*
-不同类型的局部和全局变量默认值为：int=0 float32=0 pointer=nil,string=空格
-
+int 0
+int8 0
+int32 0
+int64 0
+uint 0x0
+rune 0 //rune的实际类型是 int32
+byte 0x0 // byte的实际类型是 uint8
+float32 0 //长度为 4 byte
+float64 0 //长度为 8 byte
+bool false
+string ""
+指针为nil
 */
 func Finit() {
-	var i int
-	var f float64
-	var b bool
-	var s string
-	var by byte
-	fmt.Printf("%v %v %v %q %v\n", i, f, b, s, by)
+	var vari int
+	var varf float64
+	var varb bool
+	var vars string
+	var varby byte
+	var varui uint
+	var varpo *int
+	fmt.Println("初始化:", vari, varf, varb, vars, varby, varui, varpo)
 }
 
 //返回多个值
@@ -320,6 +354,10 @@ func Fconvert() {
 	u := uint(f)
 	fmt.Println(f, u)
 }
+
+/*在循环里面有两个关键操作 break 和 continue , break 操作是跳出当前循
+环， continue 是跳过本次循环。当嵌套过深的时候， break 可以配合标签使
+用，即跳转至标签所指定的位置*/
 func Ffor() {
 	sum := 0
 	for i := 0; i < 10; i++ {
@@ -327,8 +365,17 @@ func Ffor() {
 	}
 	fmt.Println(sum)
 	sum = 1
-	for sum < 1000 {
+	for sum < 2000 {
 		sum += sum
+		if sum < 1500 {
+			fmt.Println("continue")
+			continue
+		}
+		if sum > 1800 {
+			fmt.Println("break")
+			break
+		}
+
 	}
 	fmt.Println(sum)
 }
@@ -432,6 +479,86 @@ func Ferror() {
 	}
 }
 
+//用 goto 跳转到必须在当前函数内定义的标签
+func Fgoto() {
+	i := 0
+Here:
+	println(i)
+	i++
+	fmt.Println(i)
+	if i < 10 {
+		goto Here
+	}
+
+}
+
+//变参
+func Fvarparams(params ...string) {
+	for _, str := range params {
+		fmt.Println(str)
+	}
+}
+
+/*传值与传指针,传指针比较轻量级 (8bytes),只是传内存地址，我们可以用指针传递体积大的结
+构体。如果用参数值传递的话, 在每次copy上面就会花费相对较多的系统开销
+（内存和时间）。所以当你要传递大的结构体的时候，用指针是一个明智的选
+择。channel ， slice ， map 这三种类型的实现机制类似指针，所
+以可以直接传递，而不用取地址后传递指针*/
+func Fparamandadd(x int, y *int) {
+	x = x + 100
+	*y = *y + 100
+}
+func init() {
+	stra := `Go里面有两个保留的函数： init 函数（能够应用于所有的 package ）
+和 main 函数（只能应用于 package main ）。这两个函数在定义时不能有任何
+的参数和返回值。虽然一个 package 里面可以写任意多个 init 函数，但这无论
+是对于可读性还是以后的可维护性来说，我们都强烈建议用户在一个 package 中
+每个文件只写一个 init 函数。Go程序会自动调用 init() 和 main() ，所以你不需要在任何地方调用这两个函
+数。每个 package 中的 init 函数都是可选的，但 package main 就必须包含一个 main 函数。
+程序的初始化和执行都起始于 main 包。如果 main 包还导入了其它的包，那么
+就会在编译时将它们依次导入。有时一个包会被多个包同时导入，那么它只会被导
+入一次（例如很多包可能都会用到 fmt 包，但它只会被导入一次，因为没有必要
+导入多次）。当一个包被导入时，如果该包还导入了其它的包，那么会先将其它包
+导入进来，然后再对这些包中的包级常量和变量进行初始化，接着执行 init 函数
+（如果有的话），依次类推。等所有被导入的包都加载完毕了，就会开始
+对 main 包中的包级常量和变量进行初始化，然后执行 main 包中的 init 函数
+（如果存在的话），最后执行 main 函数。`
+	fmt.Println(stra)
+	var23 = "我是全局变量，在init函数被初始化"
+
+}
+
+/*method,method不是只能作用在struct上面，他可以定义在任何你自定
+义的类型、内置类型、struct等各种类型上面。自定义类型申明如下：
+type typeName typeLiteral
+type ages int
+type money float32
+type months map[string]int
+来实现。*/
+
+type Rectangle struct {
+	width, height float64
+}
+type Circle struct {
+	radius float64
+}
+
+func (r Rectangle) area() float64 {
+	return r.width * r.height
+}
+func (c Circle) area() float64 {
+	return c.radius * c.radius * math.Pi
+}
+
+//method继承
+func (h *Human) Finherit() {
+	fmt.Printf("Hi, I am %s , %d years old and i have weight %d kg \n", h.name, h.age, h.weight)
+}
+func (e *Employee) FinheritRW() {
+	fmt.Printf("Hi, I am %s , %d years old and i have weight %d kg \n", e.name, e.age, e.weight)
+	fmt.Println("是", e.company, "的职员")
+}
+
 //入口函数
 func main() {
 
@@ -491,6 +618,25 @@ func main() {
 	fmt.Println(<-ch2, <-ch2, <-ch2, <-ch2)
 	Fstrings()
 	Ferror()
+	//Fgoto()
+	Fvarparams("test string1", "test string2", "test string3", "test string4")
+	parama := 100
+	pointa := 100
+	Fparamandadd(parama, &pointa)
+	fmt.Println(parama, pointa)
+	r1 := Rectangle{12, 2}
+	r2 := Rectangle{9, 4}
+	c1 := Circle{10}
+	c2 := Circle{25}
+	fmt.Println("Area of r1 is: ", r1.area())
+	fmt.Println("Area of r2 is: ", r2.area())
+	fmt.Println("Area of c1 is: ", c1.area())
+	fmt.Println("Area of c2 is: ", c2.area())
+	mark := Student{Human{"Mark", 25, 70}, "computer"}
+	sam := Employee{Human{"Sam", 45, 90}, "Golang Inc"}
+	mark.Finherit()
+	sam.Finherit()
+	sam.FinheritRW()
 	fmt.Println("end")
 
 }
