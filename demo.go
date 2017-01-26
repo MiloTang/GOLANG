@@ -10,6 +10,7 @@ import (
 	_ "fmt" _操作其实是引入该包，而不直接使用包里面的函数，而是调用了该包里面的init函数。
 	*/
 	"math"
+	"reflect"
 	"runtime"
 	"time"
 	/*上面这个fmt是Go语言的标准库，其实是去 GOROOT 环境变量指定目录下去加载该
@@ -72,7 +73,7 @@ var (
 	amen     Persons
 	aboby    = Persons{"Joy", 11, "男", 1.30}
 	vertu    = Mobile{"Vertu", 100000.00, "电信"}
-	huaweip8 = Mobile{"化为P8", 3000.00, "移动"}
+	huaweip8 = HuaWei{Mobile{"化为P8", 3000.00, "移动"}, "一个年轻人的专享"}
 
 	//channel 可以是 带缓冲的。为 make 提供第二个参数作为缓冲长度来初始化一个缓冲
 	ch1 = make(chan int)
@@ -88,8 +89,9 @@ var (
 	slice3 = make([]string, 2)
 	slice4 = []int{1, 2, 3}
 
-	//接口类型（interface）
-	phone Phone
+	//接口类型（interface）空interface(interface{})不包含任何的method，正因为如此，所有的类型都实现了空interface
+	phone   Phone
+	emptyin interface{}
 
 	/*Map 类型M是一种无序的键值对的集合。Map 最重要的一点是通过 key 来快速检索数据，
 	key 类似于索引，指向数据的值,var map_variable map[key_data_type]value_data_type
@@ -106,14 +108,12 @@ type Persons struct {
 	height float32
 }
 type HuaWei struct {
-	version string
-	price   float32
-	nettype string
+	Mobile
+	characteristic string
 }
 type IPhone struct {
-	version string
-	price   float32
-	nettype string
+	Mobile
+	characteristic string
 }
 type Mobile struct {
 	version string
@@ -133,6 +133,20 @@ type Employee struct {
 	Human   //匿名字段
 	company string
 }
+type AnimalData struct {
+	typename string
+	age      int
+	sex      string
+}
+type DogData struct {
+	AnimalData
+	dogtye  string
+	dogname string
+}
+type CowData struct {
+	AnimalData
+	cowcolor string
+}
 
 //函数类型
 type FuncT func(int, int)
@@ -141,6 +155,11 @@ type FuncT func(int, int)
 type Phone interface {
 	call()
 	net()
+}
+type Animal interface {
+	Move()
+	Sound()
+	Eat()
 }
 
 //常量const identifier [type] = value
@@ -276,10 +295,9 @@ func Frecursion(x int) (result int) {
 
 func (huawei HuaWei) call() {
 	fmt.Println("hello, huawei!")
-	huawei.version = "meta9"
-	huawei.price = 10000.01
 	fmt.Println("版本:", huawei.version)
 	fmt.Printf("价格:%0.2f\n", huawei.price)
+	fmt.Println("其他特点:", huawei.characteristic)
 }
 
 func (huawei HuaWei) net() {
@@ -288,10 +306,9 @@ func (huawei HuaWei) net() {
 
 func (iPhone IPhone) call() {
 	fmt.Println("hello, Iphone")
-	iPhone.version = "iphone7"
-	iPhone.price = 7000.01
 	fmt.Println("版本:", iPhone.version)
 	fmt.Printf("价格:%0.2f\n", iPhone.price)
+	fmt.Println("其他特点:", iPhone.characteristic)
 }
 func (iPhone IPhone) net() {
 	fmt.Println("网络类型:", iPhone.nettype)
@@ -306,16 +323,25 @@ func (mb Mobile) net() {
 func Finterface() {
 	phone = new(HuaWei)
 	phone.call()
+	phone = HuaWei{Mobile{"版本: meta10", 99999, "电信"}, "产于中国"}
+	phone.call()
 	phone = new(IPhone)
 	phone.call()
+	phone = IPhone{Mobile{"版本: 苹果9", 99999, "电信"}, "没啥可说"}
 	phone = new(Mobile)
 	phone.call()
 	phone.net()
 
 	vertu.call()
 	vertu.net()
+	phone = vertu
+	phone.call()
+	phone.net()
 	huaweip8.call()
 	huaweip8.net()
+	phone = huaweip8
+	phone.call()
+	phone.net()
 
 }
 
@@ -550,13 +576,88 @@ func (c Circle) area() float64 {
 	return c.radius * c.radius * math.Pi
 }
 
-//method继承
+//method
 func (h *Human) Finherit() {
 	fmt.Printf("Hi, I am %s , %d years old and i have weight %d kg \n", h.name, h.age, h.weight)
 }
-func (e *Employee) FinheritRW() {
+
+//重载
+func (e *Employee) Finherit() {
 	fmt.Printf("Hi, I am %s , %d years old and i have weight %d kg \n", e.name, e.age, e.weight)
 	fmt.Println("是", e.company, "的职员")
+}
+
+//动物接口方法
+func (animal AnimalData) Move() {
+	fmt.Println(animal.typename, "===Move")
+}
+func (animal AnimalData) Sound() {
+	fmt.Println(animal.typename, "===Sound")
+}
+func (animal AnimalData) Eat() {
+	fmt.Println(animal.typename, "===Eat")
+}
+
+//重载AnimalData的Move方法
+func (dog DogData) Move() {
+	fmt.Println(dog.typename, "===Move", "品种是:", dog.dogtye)
+}
+
+func Finterfaceexample() {
+	var anm Animal
+	pitter := AnimalData{"猫", 1, "母"}
+	noob := DogData{AnimalData{"狗", 2, "公"}, "藏敖", "小菜"}
+	niu := CowData{AnimalData{"牛", 5, "公"}, "黄色"}
+	anm = pitter
+	anm.Move()
+	anm.Sound()
+	anm.Eat()
+	anm = noob
+	anm.Move()
+	anm.Sound()
+	anm.Eat()
+	anm = niu
+	anm.Move()
+	anm.Sound()
+	anm.Eat()
+
+}
+
+//反射Go语言实现了反射，所谓反射就是能检查程序在运行时的状态
+func Freflect() {
+	i := 100
+	t := reflect.TypeOf(i)
+	v := reflect.ValueOf(&i)
+	v.Elem().SetInt(200)
+	t2 := reflect.TypeOf(aboby)
+	v2 := reflect.ValueOf(aboby)
+	fmt.Println(t, reflect.ValueOf(i))
+	fmt.Println(t2, v2)
+}
+
+//果存在多个channel的时候，可过 select 可以监听channel上的数据流动。
+func fibonacci(c, quit chan int) {
+	x, y := 1, 1
+	for {
+		select {
+		case c <- x:
+			x, y = y, x+y
+		case <-quit:
+			fmt.Println("quit")
+			return
+		}
+	}
+}
+func Fselect() {
+	c := make(chan int)
+	quit := make(chan int)
+	go func() {
+		for i := 0; i < 10; i++ {
+			fmt.Println(<-c)
+		}
+		quit <- 0
+	}()
+	fibonacci(c, quit)
 }
 
 //入口函数
@@ -632,11 +733,17 @@ func main() {
 	fmt.Println("Area of r2 is: ", r2.area())
 	fmt.Println("Area of c1 is: ", c1.area())
 	fmt.Println("Area of c2 is: ", c2.area())
+	milo := Human{"Milo", 25, 70}
 	mark := Student{Human{"Mark", 25, 70}, "computer"}
 	sam := Employee{Human{"Sam", 45, 90}, "Golang Inc"}
+	milo.Finherit()
+	//方法继承
 	mark.Finherit()
+	//方法重载
 	sam.Finherit()
-	sam.FinheritRW()
+	Finterfaceexample()
+	Freflect()
+	Fselect()
 	fmt.Println("end")
 
 }
