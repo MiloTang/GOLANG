@@ -66,7 +66,7 @@
 		<div class="input-group-addon">
 			<span class="glyphicon glyphicon-user"></span>
 		</div>
-		<input class="form-control" name="username" id="username" placeholder="昵称" autocomplete="off" type="text">
+		<input class="form-control" name="username" id="username" placeholder="昵称" value="{{.Username}}" autocomplete="off" type="text">
 		</div>
    </div>
 
@@ -75,7 +75,7 @@
 		<div class="input-group-addon">
 			<span class="glyphicon glyphicon-lock"></span>
 		</div>
-		<input class="form-control" name="password" id="password" placeholder="密码" autocomplete="off" type="password">
+		<input class="form-control" name="password" id="password" placeholder="密码" autocomplete="off" type="password" value="{{.Password}}">
 	  </div>
    </div>
 
@@ -86,13 +86,14 @@
 	  <div class="input-group-addon"><span>MILOGE</span></div>
     </div>
   </div>
-  <input type="hidden" name="token" value={{.Token}}>	
+  <input type="hidden" name="token" value="{{.Token}}">	
    <div class="form-group">
       
          <div class="checkbox">
             <label>
                <input type="checkbox"> 请记住我
             </label>
+			<span style="color:red" class="full-right">{{.Info}}</span>
          </div>
       
    </div>
@@ -100,6 +101,7 @@
          <button type="submit" class="btn btn-primary btn-lg btn-block ">登录</button>
    </div>
 </form>
+
 </div>
 
 <div class="col-sm-4 col-md-4">

@@ -659,10 +659,18 @@ func Fselect() {
 	}()
 	fibonacci(c, quit)
 }
+func Fpanic() {
+	panic("error")
+}
 
 //入口函数
 func main() {
 
+	defer func() { // 必须要先声明defer，否则不能捕获到panic异常
+		if err := recover(); err != nil {
+			fmt.Println(err) // 这里的err其实就是panic传入的内容，55
+		}
+	}()
 	//函数内定义的变量称为局部变量
 
 	//变量名 := 值，出现在:=左侧的变量不应该是已经被声明过的，否则会导致编译错误，这种不带声明格式的只能在函数体中出现
@@ -744,6 +752,7 @@ func main() {
 	Finterfaceexample()
 	Freflect()
 	Fselect()
+	Fpanic()
 	fmt.Println("end")
 
 }
