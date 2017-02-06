@@ -49,12 +49,12 @@ func main() {
 	Gzip()
 	Ungzip()
 	TempDirFile()
-	Download()
+	//	Download()
 	Hash()
 	Dir()
 }
 func Dir() {
-	dirlist, err1 := ioutil.ReadDir("H:/")
+	dirlist, err1 := ioutil.ReadDir("C:/")
 	if err1 != nil {
 		fmt.Println("read dir error")
 		return
