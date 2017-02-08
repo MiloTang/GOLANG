@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"fmt"
+	"goweb/golib/gocs"
 	"html/template"
 	"io"
 	"log"
@@ -26,16 +27,19 @@ type Context struct {
 }
 
 var (
-	p    = &Page{}
-	temp = map[string]string{"token": ""}
+	p                        = &Page{}
+	temp                     = map[string]string{"token": ""}
+	CS   *gocs.CookieSession = nil
 )
 
+type method func(http.ResponseWriter, *http.Request)
+
 func index(w http.ResponseWriter, r *http.Request) {
-	cs := []Context{{"Go表单登录示例", "/goformlogin/"}, {"Go令牌", "/fotoken/"}}
-	cs = append(cs, Context{"GoCross", "/gocross/"})
+	fmt.Println(r.URL.Path)
+	contexts := []Context{{"Go表单登录示例", "/goformlogin/"}, {"Go令牌", "/gotoken/"}, {"Go删除Session", "/gosession/"}}
+	contexts = append(contexts, Context{"GoCross", "/gocross/"})
 	p.Title = "Go Web Samples"
-	p.Lists = cs
-	fmt.Println("path", r.URL.Path)
+	p.Lists = contexts
 	for k, v := range r.Form {
 		fmt.Println("key:", k)
 		fmt.Println("val:", strings.Join(v, ""))
@@ -54,8 +58,12 @@ func gosuccess(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/goformlogin/", 302)
 	}
 }
+func gosession(w http.ResponseWriter, r *http.Request) {
+	CS.DestroySession(w, r)
+	//http.Redirect(w, r, "/index/", 302)
+
+}
 func goformlogin(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method)
 	p.Title = "Go Login示例"
 	p.Username = ""
 	if r.Method == "GET" {
@@ -100,12 +108,16 @@ func token() {
 	temp["token"] = p.Token
 }
 func main() {
+	gocs.MaxLT = 3600
+	gocs.CookieName = "mytest"
+	CS = gocs.NewCookieSession()
 	http.Handle("/css/", http.FileServer(http.Dir("static")))
 	http.Handle("/js/", http.FileServer(http.Dir("static")))
 	http.Handle("/fonts/", http.FileServer(http.Dir("static")))
-	http.HandleFunc("/index/", index)
+	http.HandleFunc("/", index)
 	http.HandleFunc("/gosuccess/", gosuccess)
 	http.HandleFunc("/goformlogin/", goformlogin)
+	http.HandleFunc("/gosession/", gosession)
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

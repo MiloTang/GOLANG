@@ -51,16 +51,26 @@ func main() {
 	TempDirFile()
 	//	Download()
 	Hash()
-	Dir()
+	path, err1 := os.Getwd()
+	CheckError(err1)
+	ListDirs(path)
 }
-func Dir() {
-	dirlist, err1 := ioutil.ReadDir("C:/")
+
+func ListDirs(path string) {
+
+	dirlist, err1 := ioutil.ReadDir(path)
+	PthSep := string(os.PathSeparator)
 	if err1 != nil {
 		fmt.Println("read dir error")
 		return
 	}
-	for i, v := range dirlist {
-		fmt.Println(i, "=", v.Name())
+	for _, list := range dirlist {
+		if list.IsDir() {
+			fmt.Println(path + PthSep + list.Name())
+			ListDirs(path + PthSep + list.Name())
+		} else {
+			fmt.Println(path + PthSep + list.Name())
+		}
 	}
 }
 func Hash() {
