@@ -20,6 +20,7 @@ type Page struct {
 	Info     string
 	Username string
 	Password string
+	Error    error
 }
 type Context struct {
 	Introduction string
@@ -27,14 +28,15 @@ type Context struct {
 }
 
 var (
-	p                        = &Page{}
-	temp                     = map[string]string{"token": ""}
-	CS   *gocs.CookieSession = nil
+	p                         = &Page{}
+	cs    *gocs.CookieSession = nil
+	Debug bool                = true
 )
 
 type method func(http.ResponseWriter, *http.Request)
 
 func index(w http.ResponseWriter, r *http.Request) {
+	cs.StartSession(w, r)
 	fmt.Println(r.URL.Path)
 	contexts := []Context{{"Go表单登录示例", "/goformlogin/"}, {"Go令牌", "/gotoken/"}, {"Go删除Session", "/gosession/"}}
 	contexts = append(contexts, Context{"GoCross", "/gocross/"})
@@ -48,69 +50,65 @@ func index(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, p)
 }
 func gosuccess(w http.ResponseWriter, r *http.Request) {
-	u, ok := temp["username"]
-	fmt.Println(u)
-	if ok {
-		p.Username = u
-		t, _ := template.ParseFiles("vip.html")
-		t.Execute(w, p)
-	} else {
-		http.Redirect(w, r, "/goformlogin/", 302)
-	}
+	t, _ := template.ParseFiles("vip.html")
+	t.Execute(w, p)
 }
 func gosession(w http.ResponseWriter, r *http.Request) {
-	CS.DestroySession(w, r)
+	cs.DestroySession(w, r)
 	//http.Redirect(w, r, "/index/", 302)
+
+}
+func ErrorPage(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("vip.html")
+	t.Execute(w, p)
 
 }
 func goformlogin(w http.ResponseWriter, r *http.Request) {
 	p.Title = "Go Login示例"
 	p.Username = ""
+	id, err := cs.GetSessionID(r)
+	if err != nil {
+		ShowBug(w, err)
+		return
+	}
+	cs.SetSession(id, "token", "temptoken")
 	if r.Method == "GET" {
 		p.Info = ""
-		token()
 		t, _ := template.ParseFiles("login.html")
 		t.Execute(w, p)
 	} else {
 		r.ParseForm()
-		if temp["token"] != "" && temp["token"] == r.Form.Get("token") {
-			temp["token"] = ""
-		} else {
-			fmt.Fprintf(w, "不要重复提交")
-			return
-		}
-		if len(r.Form["username"][0]) == 0 {
+		username := template.HTMLEscapeString(r.FormValue("username"))
+		password := template.HTMLEscapeString(r.FormValue("password"))
+		if len(username) == 0 {
 			p.Info = "用户名不能为空"
-			token()
 			p.Password = r.Form.Get("password")
 			t, _ := template.ParseFiles("login.html")
 			t.Execute(w, p)
 			return
 		}
-		if len(r.Form["password"][0]) < 6 {
+		if len(password) < 6 {
 			p.Info = "密码不能小于6位"
-			token()
 			p.Username = r.Form.Get("username")
 			t, _ := template.ParseFiles("login.html")
 			t.Execute(w, p)
 			return
 		}
-		temp["username"] = r.Form.Get("username")
 		http.Redirect(w, r, "/gosuccess/", 302)
 	}
 }
 
-func token() {
+func token() string {
 	crutime := time.Now().Unix()
 	t := md5.New()
 	io.WriteString(t, strconv.FormatInt(crutime, 10))
 	p.Token = fmt.Sprintf("%x", t.Sum(nil))
-	temp["token"] = p.Token
+	return p.Token
 }
 func main() {
 	gocs.MaxLT = 3600
 	gocs.CookieName = "mytest"
-	CS = gocs.NewCookieSession()
+	cs = gocs.NewCookieSession()
 	http.Handle("/css/", http.FileServer(http.Dir("static")))
 	http.Handle("/js/", http.FileServer(http.Dir("static")))
 	http.Handle("/fonts/", http.FileServer(http.Dir("static")))
@@ -121,5 +119,12 @@ func main() {
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
+	}
+}
+func ShowBug(w http.ResponseWriter, e error) {
+	if Debug {
+		fmt.Fprintf(w, e.Error())
+	} else {
+		fmt.Fprintf(w, "出了点小问题，请稍等")
 	}
 }
