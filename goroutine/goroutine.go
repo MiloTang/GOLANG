@@ -18,7 +18,6 @@ func main() {
 
 func print(num int) {
 	for {
-
 		fmt.Println(i)
 		i += 1
 	}
