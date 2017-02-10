@@ -31,10 +31,6 @@ func main() {
 			panic(err)
 		}
 		fmt.Printf("%v\n", data)
-		if line == "quit\n" {
-			fmt.Println(line)
-			break
-		}
 	}
 
 }
