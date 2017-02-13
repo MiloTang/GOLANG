@@ -298,7 +298,7 @@ func main() {
 	http.HandleFunc("/formlogin/", formlogin)
 	http.HandleFunc("/delsession/", delsession)
 	http.HandleFunc("/editor/", editor)
-	err := http.ListenAndServe(":80", nil)
+	err := http.ListenAndServe(":8000", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

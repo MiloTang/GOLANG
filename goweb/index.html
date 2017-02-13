@@ -52,12 +52,14 @@
 			</div>	
 	</div>
 </nav>
-
-
 <div class="container">
-{{range $x := .Lists}}
+<div id="list">
+{{range $num,$x:= .Lists}}
+{{if lt $num 1}}
 <a href="{{$x.Link}}" class="list-group-item">{{$x.Introduction}}<span class="pull-right glyphicon glyphicon-chevron-right"></span></a>
 {{end}}
+{{end}}
+</div>
 </div>
 </body>
 </html>			
