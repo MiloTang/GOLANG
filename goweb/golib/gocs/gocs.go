@@ -44,7 +44,7 @@ func (cs CookieSession) GC() {
 	}
 	time.AfterFunc(time.Duration(cs.maxLifeTime)*time.Second, func() { cs.GC() })
 }
-func (cs *CookieSession) StartSession(w http.ResponseWriter, r *http.Request) error {
+func (cs *CookieSession) StartSession(w http.ResponseWriter, r *http.Request) (string, error) {
 	cs.lock.Lock()
 	defer cs.lock.Unlock()
 	var newsessionid string = ""
@@ -52,25 +52,26 @@ func (cs *CookieSession) StartSession(w http.ResponseWriter, r *http.Request) er
 	if err != nil {
 		if err.Error() == "http: named cookie not present" {
 			newsessionid = encode(unique() + "mysession")
+			var session *Session = &Session{sessionID: newsessionid, createTime: time.Now(), values: make(map[interface{}]interface{})}
+			cs.sessions[newsessionid] = session
 		} else {
-			return err
+			return newsessionid, err
 		}
 	} else {
 		sessionid := ck.Value
 		if _, ok := cs.sessions[sessionid]; ok {
 			newsessionid = ck.Value
 		} else {
-			e := errors.New("客户端伪造了cookie value")
-			return e
+			newsessionid = encode(unique() + "mysession")
+			var session *Session = &Session{sessionID: newsessionid, createTime: time.Now(), values: make(map[interface{}]interface{})}
+			cs.sessions[newsessionid] = session
 		}
 	}
-	var session *Session = &Session{sessionID: newsessionid, createTime: time.Now(), values: make(map[interface{}]interface{})}
-	cs.sessions[newsessionid] = session
 	cookie := http.Cookie{Name: cs.cookieName, Value: newsessionid, Path: "/", HttpOnly: true, MaxAge: int(cs.maxLifeTime)}
 	http.SetCookie(w, &cookie)
-	return nil
+	return newsessionid, nil
 }
-func (cs *CookieSession) GetSessionID(r *http.Request) (string, error) {
+func (cs *CookieSession) GetSessionID(w http.ResponseWriter, r *http.Request) (string, error) {
 	cs.lock.Lock()
 	cs.lock.Unlock()
 	var sessionid string = ""
@@ -112,7 +113,7 @@ func (cs CookieSession) GetSession(sessionID string, key interface{}) (interface
 	defer cs.lock.Unlock()
 	if session, ok := cs.sessions[sessionID]; ok {
 		if value, ok := session.values[key]; ok {
-			return value, ok
+			return value, true
 		}
 	}
 	return nil, false

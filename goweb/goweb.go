@@ -3,7 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"fmt"
-	"golang/goweb/golib/gocs"
+	"goweb/golib/gocs"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -41,19 +41,23 @@ var (
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
-	cs.StartSession(w, r)
 	titles := []Context{}
 	titles = bloglists(titles, "blog")
-	p.Title = "Go Web Samples"
+	p.Title = "Milo Blog"
 	p.Lists = titles
 	t, _ := template.ParseFiles("index.html")
 	t.Execute(w, p)
 }
 func editor(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Method)
+	csid := startcs(w, r, "editor")
+	_, b := cs.GetSession(csid, "username")
+	if !b {
+		http.Redirect(w, r, "/formlogin/", 302)
+	}
+	p.Title = "blog编辑"
 	if r.Method == "GET" {
 		t, _ := template.ParseFiles("editor.html")
-		t.Execute(w, nil)
+		t.Execute(w, p)
 	} else {
 		r.ParseForm()
 		title := r.FormValue("title")
@@ -71,14 +75,13 @@ func editor(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 			io.WriteString(w, "出错了")
 		} else {
-			io.WriteString(w, "成功")
+			io.WriteString(w, "true")
 		}
 	}
 }
-func gosession(w http.ResponseWriter, r *http.Request) {
+func delsession(w http.ResponseWriter, r *http.Request) {
 	cs.DestroySession(w, r)
-	//http.Redirect(w, r, "/index/", 302)
-
+	http.Redirect(w, r, "/index/", 302)
 }
 func ErrorPage(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("error.html")
@@ -112,6 +115,28 @@ func save(filename string, context string) error {
 	}
 	return nil
 }
+func startcs(w http.ResponseWriter, r *http.Request, function string) string {
+	var csid string = ""
+	_, err = r.Cookie(gocs.CookieName)
+	if err != nil {
+		if err.Error() == "http: named cookie not present" {
+			csid, err = cs.StartSession(w, r)
+			if err != nil {
+				panic(err)
+			} else {
+				http.Redirect(w, r, "/"+function+"/", 302)
+			}
+		} else {
+			panic(err)
+		}
+	} else {
+		csid, err = cs.StartSession(w, r)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return csid
+}
 func details(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Path
 	spurls := strings.Split(url, "/")
@@ -120,10 +145,7 @@ func details(w http.ResponseWriter, r *http.Request) {
 	dets, _ := read("blog/" + spurls[2])
 	p.Details = dets
 	for i, _ := range p.Lists {
-
 		if spurls[2] == p.Lists[i].Introduction {
-			fmt.Println(p.Lists[i].Introduction)
-			fmt.Println(spurls[2])
 			if i > 0 {
 				p.Previous = "/" + p.Lists[i-1].Link
 			} else {
@@ -137,7 +159,6 @@ func details(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	t.Execute(w, p)
-
 }
 func read(filename string) (string, error) {
 	var context []byte
@@ -176,16 +197,17 @@ func bloglists(titles []Context, path string) []Context {
 	}
 	return titles
 }
-func goformlogin(w http.ResponseWriter, r *http.Request) {
-	p.Title = "Go Login示例"
-	p.Username = ""
-	id, err := cs.GetSessionID(r)
-	if err != nil {
-		ShowBug(w, err)
-		return
+func formlogin(w http.ResponseWriter, r *http.Request) {
+	csid := startcs(w, r, "formlogin")
+	_, b := cs.GetSession(csid, "username")
+	if b {
+		http.Redirect(w, r, "/editor/", 302)
 	}
-	cs.SetSession(id, "token", "temptoken")
+	p.Title = "Milo Blog Login"
+	p.Username = ""
 	if r.Method == "GET" {
+		cs.SetSession(csid, "token", token())
+		cstk, _ := cs.GetSession(csid, "token")
 		p.Info = ""
 		t, _ := template.ParseFiles("login.html")
 		t.Execute(w, p)
@@ -193,21 +215,58 @@ func goformlogin(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		username := template.HTMLEscapeString(r.FormValue("username"))
 		password := template.HTMLEscapeString(r.FormValue("password"))
+		tk := template.HTMLEscapeString(r.FormValue("token"))
+		cstk, _ := cs.GetSession(csid, "token")
 		if len(username) == 0 {
 			p.Info = "用户名不能为空"
-			p.Password = r.Form.Get("password")
+			p.Username = username
+			p.Password = password
 			t, _ := template.ParseFiles("login.html")
 			t.Execute(w, p)
 			return
 		}
 		if len(password) < 6 {
 			p.Info = "密码不能小于6位"
-			p.Username = r.Form.Get("username")
+			p.Username = username
+			p.Password = password
 			t, _ := template.ParseFiles("login.html")
 			t.Execute(w, p)
 			return
 		}
-		http.Redirect(w, r, "/editor/", 302)
+		_, err = os.Stat("user/" + username)
+		if err != nil {
+			if os.IsNotExist(err) {
+				p.Info = "用户名不存在"
+				p.Username = username
+				p.Password = password
+				t, _ := template.ParseFiles("login.html")
+				t.Execute(w, p)
+				return
+			}
+			panic(err)
+		} else {
+			ps, e := ioutil.ReadFile("user/" + username)
+			if e != nil {
+				panic(e)
+			}
+			if tomd5(password) == string(ps) {
+				if tk == cstk {
+					cs.SetSession(csid, "token", "")
+				} else {
+					io.WriteString(w, "不要重复提交")
+					return
+				}
+				cs.SetSession(csid, "username", username)
+				http.Redirect(w, r, "/editor/", 302)
+			} else {
+				p.Info = "密码不对"
+				p.Username = username
+				p.Password = password
+				t, _ := template.ParseFiles("login.html")
+				t.Execute(w, p)
+				return
+			}
+		}
 	}
 }
 
@@ -218,9 +277,14 @@ func token() string {
 	p.Token = fmt.Sprintf("%x", t.Sum(nil))
 	return p.Token
 }
+func tomd5(str string) string {
+	md := md5.New()
+	md.Write([]byte(str))
+	return fmt.Sprintf("%x", md.Sum(nil))
+}
 func main() {
 	gocs.MaxLT = 3600
-	gocs.CookieName = "mytest"
+	gocs.CookieName = "Miloblog"
 	cs = gocs.NewCookieSession()
 	http.Handle("/css/", http.FileServer(http.Dir("static")))
 	http.Handle("/js/", http.FileServer(http.Dir("static")))
@@ -228,8 +292,8 @@ func main() {
 	http.Handle("/fonts/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/", index)
 	http.HandleFunc("/details/", details)
-	http.HandleFunc("/goformlogin/", goformlogin)
-	http.HandleFunc("/gosession/", gosession)
+	http.HandleFunc("/formlogin/", formlogin)
+	http.HandleFunc("/delsession/", delsession)
 	http.HandleFunc("/editor/", editor)
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {
@@ -241,5 +305,6 @@ func ShowBug(w http.ResponseWriter, e error) {
 		fmt.Fprintf(w, e.Error())
 	} else {
 		fmt.Fprintf(w, "出了点小问题，请稍等")
+		log.Println(e.Error())
 	}
 }

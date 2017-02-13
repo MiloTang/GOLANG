@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/xml"
 	"fmt"
 	"reflect"

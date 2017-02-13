@@ -52,7 +52,7 @@
 			</div>	
 			<div class="col-xs-3 col-sm-3">
 			<div class="dropdown">
-				<a href="/goformlogin/">
+				<a href="/formlogin/">
 					<span class="glyphicon glyphicon-user"></span>
 				</a>
 			</div>
@@ -66,6 +66,7 @@
 
 </div>
 </body>
+<div><a href="/delsession/">注销</a></div>
 <div class="container">
   <div class="hero-unit">
     <div><input id="arttitle" type="text" class="btn-block" placeholder="标题"></div>
@@ -183,16 +184,19 @@ $("#getcon").click(function(){
 			//提交的数据        
             data:{title:$title,content:$content},
 			//返回数据的格式，有"xml", "html", "script", "json", "jsonp", "text".
-            datatype: "html",
+            datatype: "text",
             //在请求之前调用的函数
             beforeSend:function(){$("#info").html("");},
             //成功返回之后调用的函数             
             success:function(data){
            		$("#info").html(data); 
-				var  $cm=confirm("在写一篇？")
-				if($cm==true){
+				if(data=="true"){
+					var  $cm=confirm("在写一篇？")
+					if($cm==true){
 					location.href="/editor/"
-				}    
+					} 
+				} 
+				   
             },
             //调用执行后调用的函数
             complete: function(XMLHttpRequest, textStatus){
