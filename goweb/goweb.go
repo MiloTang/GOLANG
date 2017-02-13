@@ -207,7 +207,6 @@ func formlogin(w http.ResponseWriter, r *http.Request) {
 	p.Username = ""
 	if r.Method == "GET" {
 		cs.SetSession(csid, "token", token())
-		cstk, _ := cs.GetSession(csid, "token")
 		p.Info = ""
 		t, _ := template.ParseFiles("login.html")
 		t.Execute(w, p)
@@ -221,6 +220,7 @@ func formlogin(w http.ResponseWriter, r *http.Request) {
 			p.Info = "用户名不能为空"
 			p.Username = username
 			p.Password = password
+			cs.SetSession(csid, "token", token())
 			t, _ := template.ParseFiles("login.html")
 			t.Execute(w, p)
 			return
@@ -229,6 +229,7 @@ func formlogin(w http.ResponseWriter, r *http.Request) {
 			p.Info = "密码不能小于6位"
 			p.Username = username
 			p.Password = password
+			cs.SetSession(csid, "token", token())
 			t, _ := template.ParseFiles("login.html")
 			t.Execute(w, p)
 			return
@@ -239,6 +240,7 @@ func formlogin(w http.ResponseWriter, r *http.Request) {
 				p.Info = "用户名不存在"
 				p.Username = username
 				p.Password = password
+				cs.SetSession(csid, "token", token())
 				t, _ := template.ParseFiles("login.html")
 				t.Execute(w, p)
 				return
@@ -262,6 +264,7 @@ func formlogin(w http.ResponseWriter, r *http.Request) {
 				p.Info = "密码不对"
 				p.Username = username
 				p.Password = password
+				cs.SetSession(csid, "token", token())
 				t, _ := template.ParseFiles("login.html")
 				t.Execute(w, p)
 				return
