@@ -19,7 +19,7 @@ func handleConn(conn net.Conn) {
 	data, err = bufio.NewReader(conn).ReadString('\n')
 	if err != nil {
 		fmt.Println("get client data error: ", err)
-		conn.Close()
+		//		conn.Close()
 		return
 	}
 	fmt.Printf("%v", data)
@@ -30,19 +30,19 @@ func handleConn(conn net.Conn) {
 			file, err = os.Create(s[0])
 			if err != nil {
 				fmt.Println("get client data error: ", err)
-				conn.Close()
+				//			conn.Close()
 				return
 			}
 		} else {
 			fmt.Println("get client data error: ", err)
-			conn.Close()
+			//		conn.Close()
 			return
 		}
 	} else {
 		file, err = os.OpenFile(s[0], os.O_APPEND, 0666)
 		if err != nil {
 			fmt.Println("get client data error: ", err)
-			conn.Close()
+			//		conn.Close()
 			return
 		}
 	}
@@ -50,10 +50,10 @@ func handleConn(conn net.Conn) {
 	_, err = file.WriteString(data)
 	if err != nil {
 		fmt.Println("get client data error: ", err)
-		conn.Close()
+		//conn.Close()
 		return
 	}
-	//	fmt.Fprintf(conn, "hello client\n")
+	fmt.Fprintf(conn, "hello client"+conn.RemoteAddr().String()+"\n")
 	//fmt.Println(conn.RemoteAddr())
 	conn.Close()
 }

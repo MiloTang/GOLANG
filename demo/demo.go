@@ -752,6 +752,14 @@ func main() {
 	Finterfaceexample()
 	Freflect()
 	Fselect()
+	//当我们不希望给函数起名字的时候，可以使用匿名函数
+	func() {
+		sum := 0
+		for i := 1; i <= 100; i++ {
+			sum += i
+		}
+		fmt.Println(sum)
+	}()
 	Fpanic()
 	fmt.Println("end")
 
