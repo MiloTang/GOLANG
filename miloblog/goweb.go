@@ -3,11 +3,13 @@ package main
 import (
 	"crypto/md5"
 	"fmt"
-	"goweb/golib/gocs"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
+	"miloblog/golib/gocs"
+	"miloblog/golib/godb"
+	"miloblog/wr"
 	"net/http"
 	"os"
 	"strconv"
@@ -40,9 +42,27 @@ var (
 	file  *os.File
 )
 
-func index(w http.ResponseWriter, r *http.Request) {
-	show(w, r)
-	fmt.Println(r.URL)
+func entry(w http.ResponseWriter, r *http.Request) {
+	godb.Mysql()
+	if r.URL.Path == "/" {
+		wr.Index(w, r)
+	} else {
+		urls := strings.Split(r.URL.Path, "/")
+		fmt.Println(r.URL.Path, urls)
+		switch urls[1] {
+		case "life":
+			wr.Life(w, r)
+		case "admin":
+			wr.Admin(w, r)
+		case "manual":
+			wr.Manual(w, r)
+		case "index":
+			wr.Index(w, r)
+		default:
+			ErrorPage(w, r)
+		}
+	}
+
 	//	titles := []Context{}
 	//	titles = bloglists(titles, "blog")
 	//	p.Title = "Milo Blog"
@@ -50,18 +70,12 @@ func index(w http.ResponseWriter, r *http.Request) {
 	//	t, _ := template.ParseFiles("index.html")
 	//	t.Execute(w, p)
 }
-func onboot(w http.ResponseWriter, r *http.Request) {
-	t, _ := template.ParseFiles("bootstrap.html")
-	t.Execute(w, nil)
-}
+
 func show(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("show.html")
 	t.Execute(w, nil)
 }
-func layoutit(w http.ResponseWriter, r *http.Request) {
-	t, _ := template.ParseFiles("layoutit.html")
-	t.Execute(w, nil)
-}
+
 func editor(w http.ResponseWriter, r *http.Request) {
 	csid := startcs(w, r, "editor")
 	_, b := cs.GetSession(csid, "username")
@@ -99,7 +113,7 @@ func delsession(w http.ResponseWriter, r *http.Request) {
 }
 func ErrorPage(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("error.html")
-	t.Execute(w, p)
+	t.Execute(w, nil)
 }
 func save(filename string, context string) error {
 	_, err = os.Stat(filename)
@@ -310,13 +324,7 @@ func main() {
 	http.Handle("/layoutitlib/", http.FileServer(http.Dir("static")))
 	http.Handle("/wysiwyg/", http.FileServer(http.Dir("static")))
 	http.Handle("/fonts/", http.FileServer(http.Dir("static")))
-	http.HandleFunc("/", index)
-	http.HandleFunc("/details/", details)
-	http.HandleFunc("/formlogin/", formlogin)
-	http.HandleFunc("/delsession/", delsession)
-	http.HandleFunc("/editor/", editor)
-	http.HandleFunc("/onboot/", onboot)
-	http.HandleFunc("/layoutit/", layoutit)
+	http.HandleFunc("/", entry)
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

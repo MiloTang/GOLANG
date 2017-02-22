@@ -1,0 +1,5 @@
+package goupload
+
+func Upload() {
+
+}
