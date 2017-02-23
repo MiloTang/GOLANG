@@ -19,7 +19,7 @@ func main() {
 	StartClient()
 }
 func StartClient() {
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", "9.112.45.77:9999")
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", "****:9999")
 	checkError(err, "ResolveTCPAddr")
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	checkError(err, "DialTCP")
