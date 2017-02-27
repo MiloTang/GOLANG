@@ -3,7 +3,8 @@ package godb
 import (
 	"database/sql"
 	"fmt"
-	"reflect"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func Mysql() {
@@ -11,11 +12,14 @@ func Mysql() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	query, err := db.Query("select * from mysql.user")
+	query, err := db.Query("select Host,User from mysql.user")
 	if err != nil {
 		fmt.Println(err)
 	}
-	v := reflect.ValueOf(query)
-	fmt.Println(v)
+	var host, user string
+	for query.Next() {
+		query.Scan(&host, &user)
+		fmt.Println(host, user)
+	}
 	db.Close()
 }

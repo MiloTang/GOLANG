@@ -52,6 +52,7 @@ func StartServer() {
 	checkError(err, "ResolveTcpAddr")
 	l, err := net.ListenTCP("tcp", tcpAddr)
 	checkError(err, "ListenTCP")
+	defer l.Close()
 	conns := make(map[string]net.Conn)
 	messages := make(chan string, 20)
 	go echoHandler(&conns, messages)
