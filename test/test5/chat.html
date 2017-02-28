@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>聊天室</title>
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/bootstrap-glyphicons.css" rel="stylesheet">
+<link href="/css/timestyles.css" rel="stylesheet">
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script>
+        var ws = new WebSocket("ws://127.0.0.1:6611/chatroom");
+        ws.onopen = function(e){
+            console.log("onopen");
+            console.dir(e);
+        };
+        ws.onmessage = function(e){
+            console.log("onmessage");
+            console.dir(e);
+            $('#log').append('<div>'+e.data+'</div><div class="text_line">');
+            $('#log').get(0).scrollTop = $('#log').get(0).scrollHeight;
+        };
+        ws.onclose = function(e){
+            console.log("onclose");
+            console.dir(e);
+        };
+        ws.onerror = function(e){
+            console.log("onerror");
+            console.dir(e);
+        };
+        $(function(){
+            $('#msgform').submit(function(){
+                ws.send($('#msg').val()+"\n");
+                $('#log').append('<div class="pull-right" style="color:red">'+$('#msg').val()+'</div><div class="text_line">');
+                $('#log').get(0).scrollTop = $('#log').get(0).scrollHeight;
+                $('#msg').val('');
+                return false;
+            });
+        });
+		$(document).keydown(function(event){
+			if ((event.altKey)&& 
+			  ((event.keyCode==37)||   //屏蔽 Alt+ 方向键 ← 
+			   (event.keyCode==39)))   //屏蔽 Alt+ 方向键 → 
+		   { 
+			   event.returnValue=false; 
+			   return false;
+		   } 
+			if(event.keyCode==8){
+				return false; //屏蔽退格删除键  
+			}
+			if(event.keyCode==116){
+				return false; //屏蔽F5刷新键 
+			}
+			if((event.ctrlKey) && (event.keyCode==82)){
+				return false; //屏蔽alt+R 
+			}
+		});
+    </script>
+	 <style type="text/css">     
+	.text_line
+	{
+	    clear:both;
+	}
+    </style>
+</head>
+
+<body>
+<div class="container-fluid" style="background-color:sienna;margin-bottom:8px">
+    <div style="text-align:center;color: white">
+        <h3>聊天室</h3>
+    </div>
+</div>
+
+
+<div class="container">
+<div id="log" style="height: 300px;overflow-y: scroll;border: 1px solid #CCC;">
+    </div>
+    <div>
+        <form id="msgform">
+			<input type="text" class="form-control" id="msg" placeholder="请输入">
+        </form>
+    </div>
+</div>
+</body>
+</html>			

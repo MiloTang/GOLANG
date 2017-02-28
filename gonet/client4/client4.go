@@ -20,7 +20,6 @@ var (
 func main() {
 	StartClient()
 	Windows()
-	fmt.Fprintf(conn, "list:::"+"\n")
 }
 func Windows() {
 	MainWindow{
