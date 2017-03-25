@@ -54,13 +54,12 @@ func echoHandler(conns *map[string]net.Conn, messages chan string) {
 	}
 }
 func Lists(conns *map[string]net.Conn) {
-
 	var lists string = ""
 	for key, _ := range *conns {
 		lists = lists + " " + key
 	}
 	for _, value := range *conns {
-		fmt.Fprintf(value, "list:::"+lists)
+		fmt.Fprintf(value, "list:::"+lists+"\n")
 	}
 	lists = ""
 

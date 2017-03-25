@@ -15,12 +15,12 @@ var (
 	List, inTE, outTE *walk.TextEdit = nil, nil, nil
 	conn              *net.TCPConn   = nil
 	err               error
+	lists             string = ""
 )
 
 func main() {
 	StartClient()
 	Windows()
-	fmt.Fprintf(conn, "list:::"+"\n")
 }
 func Windows() {
 	MainWindow{
@@ -66,19 +66,33 @@ func ChatSend() {
 	}
 	inTE.SetText("")
 }
+func Update() {
+
+}
 func ReadServer() {
 	for {
-		data, err := bufio.NewReader(conn).ReadString('\n')
-		if checkError(err, "Connection") == false {
+		data, e := bufio.NewReader(conn).ReadString('\n')
+		if checkError(e, "Connection") == false {
 			conn.Close()
 			fmt.Println("server is dead .....byebye")
 			os.Exit(0)
 		}
-		s := strings.Split(data, ":::")
-		if s[0] == "talk" {
-			outTE.AppendText(s[1] + "\n")
-		} else {
-			List.SetText(s[1] + "\n")
+		if data == "diu" {
+			s := strings.Split(data, ":::")
+			if s[0] == "talk" {
+				outTE.AppendText(s[1] + "\n")
+			} else {
+				List.SetText("")
+				for i, value := range s {
+					if i == 0 {
+						continue
+					} else {
+						List.AppendText(value + "\n")
+					}
+
+				}
+
+			}
 		}
 
 	}
