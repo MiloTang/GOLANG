@@ -23,43 +23,28 @@
 <body>
 <div class="container-fluid" style="background-color:sienna;margin-bottom:8px">
     <div style="text-align:center;color: white">
-        <h3>Golang</h3>
+        <h3>后台操作</h3>
     </div>
 </div>
 
 <nav class="navbar navbar-default navbar-fixed-bottom">
 	<div class="container-fluid" style="font-size:2.2rem;padding-top:1rem;text-align:center;">
-		    <div class="col-xs-3 col-sm-3">
+		    <div class="col-xs-6 col-sm-6">
 			<div class="dropdown">
 				<a href="/index/">
 					<span class="glyphicon glyphicon-home"></span>
 				</a>
 			</div>
-			</div>
-			<div class="col-xs-3 col-sm-3">
+			</div>	
+			<div class="col-xs-6 col-sm-6">
 			<div class="dropdown">
-				<a href="/life/">
-					<span class="glyphicon glyphicon-th-large"></span>
-				</a>
-			</div>
-			</div>
-			<div class="col-xs-3 col-sm-3">
-			<div class="dropdown">
-				<a href="/manual/">
+				<a href="/manuallist/">
 					<span class="glyphicon glyphicon-book"></span>
 				</a>
 			</div>
-			</div>	
-			<div class="col-xs-3 col-sm-3">
-			<div class="dropdown">
-				<a href="/admin/">
-					<span class="glyphicon glyphicon-user"></span>
-				</a>
-			</div>
-			</div>	
+			</div>		
 	</div>
 </nav>
-
 
 <div class="container">
 	
@@ -70,6 +55,10 @@
 <div class="container">
   <div class="hero-unit">
     <div><input id="arttitle" type="text" class="btn-block" placeholder="标题"></div>
+	 <select class="form-control" id="arttype">
+      <option value="blog">blog</option>
+      <option value="manual">manual</option>
+    </select>
 	<div id="alerts"></div>
     <div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">
       <div class="btn-group">
@@ -175,6 +164,7 @@
 $(document).ready(function(){
 $("#getcon").click(function(){
   var $title=$("#arttitle").val();
+  var $type=$("#arttype").val(); 
   var $content=$("#editor").html();
    $.ajax({            
             //提交数据的类型 POST GET
@@ -182,7 +172,7 @@ $("#getcon").click(function(){
 			//提交的地址            
             url:"/editor/", 
 			//提交的数据        
-            data:{title:$title,content:$content},
+            data:{title:$title,type:$type,content:$content},
 			//返回数据的格式，有"xml", "html", "script", "json", "jsonp", "text".
             datatype: "text",
             //在请求之前调用的函数

@@ -43,12 +43,12 @@ var (
 func index(w http.ResponseWriter, r *http.Request) {
 	show(w, r)
 	fmt.Println(r.URL)
-	//	titles := []Context{}
-	//	titles = bloglists(titles, "blog")
-	//	p.Title = "Milo Blog"
-	//	p.Lists = titles
-	//	t, _ := template.ParseFiles("index.html")
-	//	t.Execute(w, p)
+	titles := []Context{}
+	titles = bloglists(titles, "blog")
+	p.Title = "Milo Blog"
+	p.Lists = titles
+	t, _ := template.ParseFiles("index.html")
+	t.Execute(w, p)
 }
 func onboot(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("bootstrap.html")
