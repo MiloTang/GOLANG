@@ -60,7 +60,11 @@ func Lists(conns *map[string]net.Conn) {
 		lists = lists + " " + key
 	}
 	for _, value := range *conns {
+<<<<<<< HEAD
 		fmt.Println(value, "list:::"+lists)
+=======
+		fmt.Fprintf(value, "list:::"+lists+"\n")
+>>>>>>> d16a6de7dee06f8f235393a4d4769e868047a746
 	}
 	lists = ""
 }

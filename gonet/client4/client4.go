@@ -14,6 +14,7 @@ var (
 	List, inTE, outTE *walk.TextEdit = nil, nil, nil
 	conn              *net.TCPConn   = nil
 	err               error
+	lists             string = ""
 )
 
 func main() {
@@ -64,15 +65,39 @@ func ChatSend() {
 	}
 	inTE.SetText("")
 }
+func Update() {
+
+}
 func ReadServer() {
 	for {
-		data, err := bufio.NewReader(conn).ReadString('\n')
-		if checkError(err, "Connection") == false {
+		data, e := bufio.NewReader(conn).ReadString('\n')
+		if checkError(e, "Connection") == false {
 			conn.Close()
 			fmt.Println("server is dead .....byebye")
 			os.Exit(0)
 		}
+<<<<<<< HEAD
 		outTE.AppendText(data + "\n")
+=======
+		if data == "diu" {
+			s := strings.Split(data, ":::")
+			if s[0] == "talk" {
+				outTE.AppendText(s[1] + "\n")
+			} else {
+				List.SetText("")
+				for i, value := range s {
+					if i == 0 {
+						continue
+					} else {
+						List.AppendText(value + "\n")
+					}
+
+				}
+
+			}
+		}
+
+>>>>>>> d16a6de7dee06f8f235393a4d4769e868047a746
 	}
 }
 func checkError(err error, info string) (res bool) {
