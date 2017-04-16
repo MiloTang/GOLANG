@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strings"
 )
 
 var (
@@ -30,7 +31,8 @@ func Handler(conn net.Conn, messages chan string) {
 			conn.Close()
 			break
 		}
-		reciveStr := data
+		s := strings.Split(conn.RemoteAddr().String(), ":")
+		reciveStr := s[0] + "->" + data
 		messages <- reciveStr
 	}
 }
@@ -38,7 +40,6 @@ func echoHandler(conns *map[string]net.Conn, messages chan string) {
 	for {
 		msg := <-messages
 		fmt.Println(msg)
-		fmt.Println(conns)
 		for key, value := range *conns {
 			fmt.Println("connection is connected from...", key)
 			_, err := fmt.Fprintf(value, msg)
@@ -59,10 +60,13 @@ func Lists(conns *map[string]net.Conn) {
 		lists = lists + " " + key
 	}
 	for _, value := range *conns {
+<<<<<<< HEAD
+		fmt.Println(value, "list:::"+lists)
+=======
 		fmt.Fprintf(value, "list:::"+lists+"\n")
+>>>>>>> d16a6de7dee06f8f235393a4d4769e868047a746
 	}
 	lists = ""
-
 }
 func StartServer() {
 	server := ":" + "9999"

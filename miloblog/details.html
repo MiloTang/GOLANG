@@ -29,34 +29,20 @@ $("#details").html({{.Details}})
 </div>
 <nav class="navbar navbar-default navbar-fixed-bottom">
 	<div class="container-fluid" style="font-size:2.2rem;padding-top:1rem;text-align:center;">
-		    <div class="col-xs-3 col-sm-3">
+		    <div class="col-xs-6 col-sm-6">
 			<div class="dropdown">
-				<a href="/">
+				<a href="/index/">
 					<span class="glyphicon glyphicon-home"></span>
 				</a>
 			</div>
-			</div>
-			<div class="col-xs-3 col-sm-3">
+			</div>	
+			<div class="col-xs-6 col-sm-6">
 			<div class="dropdown">
-				<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-					<span class="glyphicon glyphicon-th-large"></span>
-				</a>
-			</div>
-			</div>
-			<div class="col-xs-3 col-sm-3">
-			<div class="dropdown">
-				<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+				<a href="/manuallist/">
 					<span class="glyphicon glyphicon-book"></span>
 				</a>
 			</div>
-			</div>	
-			<div class="col-xs-3 col-sm-3">
-			<div class="dropdown">
-				<a href="/formlogin/">
-					<span class="glyphicon glyphicon-user"></span>
-				</a>
-			</div>
-			</div>	
+			</div>		
 	</div>
 </nav>
 <div class="container">
@@ -68,7 +54,7 @@ $("#details").html({{.Details}})
 <div id="details"></div>
 <ul class="pager">
     <li class="previous"><a href={{.Previous}}>&larr;上一篇 </a></li>
-	<li class="text-center"><a href="/">返回列表</a></li>
+	<li class="text-center"><a href={{.Path}}>返回列表</a></li>
     <li class="next"><a href={{.Next}}>下一篇 &rarr;</a></li>
 </ul>
 

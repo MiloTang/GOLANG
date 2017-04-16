@@ -56,38 +56,26 @@ func Select(sqlstmt string, params ...interface{}) [][]string {
 	stmt.Close()
 	return results
 }
-func Insert(sqlstmt string, params ...interface{}) {
+func DML(sqlstmt string, params ...interface{}) {
 	stmt, e := db.Prepare(sqlstmt)
 	if e != nil {
 		fmt.Println("请检查sql语句->", sqlstmt, e)
 	}
 	_, err = stmt.Exec(params...)
 	if err != nil {
-		fmt.Println("数据插入失败->", err)
+		fmt.Println("数据操作失败->", err)
 	}
 	stmt.Close()
 }
-func Delete(sqlstmt string, params ...interface{}) {
+func DDL(sqlstmt string) {
 	stmt, e := db.Prepare(sqlstmt)
 	if e != nil {
 		fmt.Println("请检查sql语句->", sqlstmt, e)
 	}
-	_, err = stmt.Exec(params...)
-	if err != nil {
-		fmt.Println("数据删除失败->", err)
+	if stmt != nil {
+		stmt.Exec()
+		stmt.Close()
 	}
-	stmt.Close()
-}
-func Update(sqlstmt string, params ...interface{}) {
-	stmt, e := db.Prepare(sqlstmt)
-	if e != nil {
-		fmt.Println("请检查sql语句->", sqlstmt, e)
-	}
-	_, err = stmt.Exec(params...)
-	if err != nil {
-		fmt.Println("数据更新失败->", err)
-	}
-	stmt.Close()
 }
 func Close() {
 	db.Close()

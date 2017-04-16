@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
@@ -49,7 +48,7 @@ func Windows() {
 	}.Run()
 }
 func StartClient() {
-	tcpAddr, e := net.ResolveTCPAddr("tcp4", "127.0.0.1:9999")
+	tcpAddr, e := net.ResolveTCPAddr("tcp4", "9.112.45.77:9999")
 	checkError(e, "ResolveTCPAddr")
 	conn, err = net.DialTCP("tcp", nil, tcpAddr)
 	checkError(err, "DialTCP")
@@ -59,7 +58,7 @@ func StartClient() {
 func ChatSend() {
 	var input string = ""
 	input = inTE.Text()
-	_, err := fmt.Fprintf(conn, "talk:::游客-->Say->"+input+"\n")
+	_, err := fmt.Fprintf(conn, input+"\n")
 	if err != nil {
 		fmt.Println(err.Error(), "Write")
 		conn.Close()
@@ -77,6 +76,9 @@ func ReadServer() {
 			fmt.Println("server is dead .....byebye")
 			os.Exit(0)
 		}
+<<<<<<< HEAD
+		outTE.AppendText(data + "\n")
+=======
 		if data == "diu" {
 			s := strings.Split(data, ":::")
 			if s[0] == "talk" {
@@ -95,6 +97,7 @@ func ReadServer() {
 			}
 		}
 
+>>>>>>> d16a6de7dee06f8f235393a4d4769e868047a746
 	}
 }
 func checkError(err error, info string) (res bool) {
