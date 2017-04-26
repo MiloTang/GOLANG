@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
+	"strconv"
 	"time"
 )
 
@@ -27,54 +27,74 @@ var (
 		"Mozilla/5.0 (iPhone, U, CPU iPhone OS 4_3_3 like Mac OS X, en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36",
 		"MQQBrowser/26 Mozilla/5.0 (Linux, U, Android 2.3.7, zh-cn, MB200 Build/GRJ22, CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"}
-	r          = rand.New(rand.NewSource(time.Now().UnixNano()))
-	atagRegExp = regexp.MustCompile(`"\./buzz\?b=.*?"`)
-	keyword    = regexp.MustCompile(`<a class="list-title".*>.*</a>`)
-	replace    = regexp.MustCompile(`<a class="list-title".*?>`)
-	head       = `<!DOCTYPE html>
+	head = `<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
     <title>{{.Title}}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-</head>
-<body>
-<div class="container">
-<div class="row">
-<div class="col-md-12">`
-	foot = `</div>
-</div>
-</div>
+	</head>
+<body>`
+	foot = `
 </body>
 </html> `
-	allstr = ""
+	r           = rand.New(rand.NewSource(time.Now().UnixNano()))
+	RegExpUrl   = regexp.MustCompile(`/article/.*?htm`)
+	RegExpText  = regexp.MustCompile(`<div id="content">[\s\S]*<div class="art_xg">`)
+	RegExpTitle = regexp.MustCompile(`<h1 class="YaHei">.*?</h1>`)
+	num         = 1
+	count       = 0
 )
 
 func init() {
 
 }
 func main() {
-	Spy("http://top.baidu.com/boards?fr=topindex")
-}
-func Spy(url string) {
-	resStr := GetBody(url)
-	atag := atagRegExp.FindAllString(resStr, -1)
-	subUrl := ""
-	for _, v := range atag {
-		subUrl = "http://top.baidu.com" + strings.Replace(v, `".`, "", -1)
-		subUrl = strings.Replace(subUrl, `"`, "", -1)
-		txt := keyword.FindAllString(GetBody(subUrl), -1)
-		//
-		for _, v1 := range txt {
-			allstr = allstr + strings.Replace(replace.ReplaceAllString(v1, ""), "</a>", "", -1) + ","
+	for {
+		fmt.Println(count)
+		if count == 11 {
+			break
+		} else {
+			GetUrl("http://www.jb51.net", GetBody(Url()))
 		}
-
 	}
-	ioutil.WriteFile("top.html", []byte(head+allstr+foot), os.ModeAppend)
+
 }
+func GetRandomUserAgent() string {
+	return userAgent[r.Intn(len(userAgent))]
+}
+func Url() string {
+	count++
+	if count < 11 {
+		return "http://www.jb51.net/list/list_246_" + strconv.Itoa(count) + ".htm"
+	}
+	return ""
+}
+func GetUrl(pre, body string) {
+	url := RegExpUrl.FindAllString(body, -1)
+	for _, v := range url {
+		GetText(pre + v)
+	}
+}
+
+func GetText(url string) {
+	body := GetBody(url)
+	fmt.Println(body)
+	os.Exit(0)
+	txt := RegExpText.FindAllString(body, -1)
+	title := RegExpTitle.FindAllString(body, -1)
+	alltxt := ""
+	for _, vt := range txt {
+		alltxt = alltxt + vt
+	}
+	alltl := ""
+	for _, vtl := range title {
+		alltl = alltl + vtl
+	}
+	ioutil.WriteFile("jb51/"+strconv.Itoa(num)+"gosample.html", []byte(head+alltl+alltxt+foot), os.ModeAppend)
+	num++
+}
+
 func GetBody(url string) string {
 	defer func() {
 		if r := recover(); r != nil {
@@ -97,7 +117,4 @@ func GetBody(url string) string {
 		bodyStr = string(bodyByte)
 	}
 	return bodyStr
-}
-func GetRandomUserAgent() string {
-	return userAgent[r.Intn(len(userAgent))]
 }

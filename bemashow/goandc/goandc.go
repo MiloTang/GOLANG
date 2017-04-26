@@ -3,8 +3,8 @@ package main
 /*
 #include <stdio.h>
 
-viod hello(){
-	printf("hello go and C world ");
+void sayHi() {
+    printf("Hi");
 }
 */
 import "C"
@@ -14,5 +14,5 @@ func init() {
 }
 
 func main() {
-	C.hello()
+	C.sayHi()
 }

@@ -27,53 +27,18 @@ var (
 		"Mozilla/5.0 (iPhone, U, CPU iPhone OS 4_3_3 like Mac OS X, en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36",
 		"MQQBrowser/26 Mozilla/5.0 (Linux, U, Android 2.3.7, zh-cn, MB200 Build/GRJ22, CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"}
-	r          = rand.New(rand.NewSource(time.Now().UnixNano()))
-	atagRegExp = regexp.MustCompile(`"\./buzz\?b=.*?"`)
-	keyword    = regexp.MustCompile(`<a class="list-title".*>.*</a>`)
-	replace    = regexp.MustCompile(`<a class="list-title".*?>`)
-	head       = `<!DOCTYPE html>
-<html lang="zh">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
-    <title>{{.Title}}</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-</head>
-<body>
-<div class="container">
-<div class="row">
-<div class="col-md-12">`
-	foot = `</div>
-</div>
-</div>
-</body>
-</html> `
-	allstr = ""
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 func init() {
 
 }
 func main() {
-	Spy("http://top.baidu.com/boards?fr=topindex")
+	Spy("http://webftcn.hermes.hexun.com/shf/sortlist?block=741&number=100&title=14&commodityid=0&direction=0&start=0&column=code,name,price,updown,buyPrice,buyVolume,sellPrice,sellVolume,volume,lastClose,open,high,low,openInterest,addPosition,amount,vibrationRatio,priceWeight,dateTime&callback=hx_json31492672869171")
 }
 func Spy(url string) {
 	resStr := GetBody(url)
-	atag := atagRegExp.FindAllString(resStr, -1)
-	subUrl := ""
-	for _, v := range atag {
-		subUrl = "http://top.baidu.com" + strings.Replace(v, `".`, "", -1)
-		subUrl = strings.Replace(subUrl, `"`, "", -1)
-		txt := keyword.FindAllString(GetBody(subUrl), -1)
-		//
-		for _, v1 := range txt {
-			allstr = allstr + strings.Replace(replace.ReplaceAllString(v1, ""), "</a>", "", -1) + ","
-		}
-
-	}
-	ioutil.WriteFile("top.html", []byte(head+allstr+foot), os.ModeAppend)
+	ioutil.WriteFile("hexun", []byte(resStr), os.ModeAppend)
 }
 func GetBody(url string) string {
 	defer func() {
@@ -82,20 +47,39 @@ func GetBody(url string) string {
 		}
 	}()
 	bodyStr := ""
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("User-Agent", GetRandomUserAgent())
-	client := http.DefaultClient
-	res, e := client.Do(req)
-	if e != nil {
-		fmt.Errorf("Get请求%s返回错误:%s", url, e)
-		return bodyStr
+	if req, err := http.NewRequest("GET", url, nil); err != nil {
+		bodyStr = err.Error()
+	} else {
+		req.Header.Set("User-Agent", GetRandomUserAgent())
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+
+		//	reg.Header.Set(`HTTP`, `2.0`)
+		//	reg.Header.Set(`Accept`, `*/*`)
+		//	reg.Header.Set(`Accept-Language`, `zh-cn`)
+		//	reg.Header.Set(`Host`, `itunes.apple.com`)
+		//	reg.Header.Set(`Connection`, `keep-alive`)
+		//	reg.Header.Set(`X-Apple-Store-Front`, `143465-19,21 t:native`)
+		//	reg.Header.Set(`X-Dsid`, `932530590`)
+		//	reg.Header.Set(`Cookie`, `xp_ci=3z1E7umazD0Dz5SBzCwNzB7weVKgD; s_vi=[CS]v1|29F61F868501299A-60000114E000452B[CE]; Pod=20; itspod=20; xt-src=b; xt-b-ts-932530590=1408324780262; mz_at_ssl-932530590=AwUAAAFRAAER1gAAAABT8vlrAo2EAZQvwAJjChIlGtIxIKYErLQ=; mz_at0-932530590=AwQAAAFRAAER1gAAAABT8VSrdHM0dXgdzosavj4+sT0AJfhYBx4=; wosid-lite=qQmZVeBH9vj91TakAeKEZg; ns-mzf-inst=35-163-80-118-68-8171-202429-20-nk11; X-Dsid=932530590`)
+		if res, e := http.DefaultClient.Do(req); e != nil {
+			bodyStr = e.Error()
+		} else {
+			if res.StatusCode == 200 {
+				body := res.Body
+				defer body.Close()
+				bodyByte, _ := ioutil.ReadAll(body)
+				bodyStr = string(bodyByte)
+			}
+		}
 	}
-	if res.StatusCode == 200 {
-		body := res.Body
-		defer body.Close()
-		bodyByte, _ := ioutil.ReadAll(body)
-		bodyStr = string(bodyByte)
+	reg := regexp.MustCompile(`(hx_json31492672869171)|(\()|(\))|(;)`)
+	bodyStr = reg.ReplaceAllString(bodyStr, "")
+	strs := strings.Split(bodyStr, `,`)
+	for k, v := range strs {
+
+		fmt.Println(k, "==", v)
 	}
+	fmt.Println(bodyStr)
 	return bodyStr
 }
 func GetRandomUserAgent() string {

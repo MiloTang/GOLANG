@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
+	"strconv"
 	"time"
 )
 
@@ -27,54 +27,82 @@ var (
 		"Mozilla/5.0 (iPhone, U, CPU iPhone OS 4_3_3 like Mac OS X, en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36",
 		"MQQBrowser/26 Mozilla/5.0 (Linux, U, Android 2.3.7, zh-cn, MB200 Build/GRJ22, CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"}
-	r          = rand.New(rand.NewSource(time.Now().UnixNano()))
-	atagRegExp = regexp.MustCompile(`"\./buzz\?b=.*?"`)
-	keyword    = regexp.MustCompile(`<a class="list-title".*>.*</a>`)
-	replace    = regexp.MustCompile(`<a class="list-title".*?>`)
-	head       = `<!DOCTYPE html>
+	head = `<!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>{{.Title}}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-</head>
-<body>
-<div class="container">
-<div class="row">
-<div class="col-md-12">`
-	foot = `</div>
-</div>
-</div>
+	</head>
+<body>`
+	foot = `
 </body>
 </html> `
-	allstr = ""
+	r           = rand.New(rand.NewSource(time.Now().UnixNano()))
+	RegExpUrl   = regexp.MustCompile(`http://lib.csdn.net/article/go/\d*"`)
+	RegExpText  = regexp.MustCompile(`<div.*class="divtexts">[\s\S]*?<div class="pinfortext">`)
+	RegExpTitle = regexp.MustCompile(`<h1 class="YaHei">.*?</h1>`)
+	num         = 1
+	count       = 0
 )
 
 func init() {
 
 }
 func main() {
-	Spy("http://top.baidu.com/boards?fr=topindex")
-}
-func Spy(url string) {
-	resStr := GetBody(url)
-	atag := atagRegExp.FindAllString(resStr, -1)
-	subUrl := ""
-	for _, v := range atag {
-		subUrl = "http://top.baidu.com" + strings.Replace(v, `".`, "", -1)
-		subUrl = strings.Replace(subUrl, `"`, "", -1)
-		txt := keyword.FindAllString(GetBody(subUrl), -1)
-		//
-		for _, v1 := range txt {
-			allstr = allstr + strings.Replace(replace.ReplaceAllString(v1, ""), "</a>", "", -1) + ","
-		}
+	//fmt.Println(RegExpUrl.FindAllString(GetBody("http://lib.csdn.net/go/node/658?page=6#md"), -1))
+	fmt.Println(RegExpText.FindAllString(GetBody("http://lib.csdn.net/article/go/62790"), -1))
+	//	for i := 32949; i < 62791; i++ {
+	//		url := "http://lib.csdn.net/article/go/" + strconv.Itoa(i)
+	//		fmt.Println(RegExpText.FindAllString(GetBody(url), -1))
+	//	}
 
-	}
-	ioutil.WriteFile("top.html", []byte(head+allstr+foot), os.ModeAppend)
+	//	for {
+	//		fmt.Println(count)
+	//		if count == 22 {
+	//			break
+	//		} else {
+	//			url := Url()
+	//			fmt.Println(url)
+	//			GetUrl("", GetBody(url))
+	//		}
+	//	}
+
 }
+func GetRandomUserAgent() string {
+	return userAgent[r.Intn(len(userAgent))]
+}
+func Url() string {
+	count++
+	if count < 22 {
+		return "http://lib.csdn.net/go/node/658?page=" + strconv.Itoa(count)
+	}
+	return ""
+}
+func GetUrl(pre, body string) {
+	url := RegExpUrl.FindAllString(body, -1)
+	for _, v := range url {
+		fmt.Println(v)
+		GetText(pre + v)
+	}
+}
+
+func GetText(url string) {
+	body := GetBody(url)
+	txt := RegExpText.FindAllString(body, -1)
+	title := RegExpTitle.FindAllString(body, -1)
+	alltxt := ""
+	for _, vt := range txt {
+		alltxt = alltxt + vt
+	}
+	alltl := ""
+	for _, vtl := range title {
+		alltl = alltl + vtl
+	}
+	ioutil.WriteFile("csdn/"+strconv.Itoa(num)+"go.html", []byte(head+alltl+alltxt+foot), os.ModeAppend)
+	num++
+}
+
 func GetBody(url string) string {
 	defer func() {
 		if r := recover(); r != nil {
@@ -97,7 +125,4 @@ func GetBody(url string) string {
 		bodyStr = string(bodyByte)
 	}
 	return bodyStr
-}
-func GetRandomUserAgent() string {
-	return userAgent[r.Intn(len(userAgent))]
 }

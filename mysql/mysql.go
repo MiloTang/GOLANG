@@ -58,9 +58,7 @@ func Select(sqlstmt string, params ...interface{}) {
 				result[i] = ""
 			} else {
 				result[i] = string(raw)
-				fmt.Println(i, "==", string(raw))
 			}
-
 		}
 		results = append(results, result)
 	}
