@@ -14,28 +14,13 @@
 </head>
 <body>
  
-<h1>首页</h1>
-{{.Title |html}}
-<br>
-{{.Details |html}}
-<br>
-<table border="1">
-<tr>
- 	<td>ID</td>
-	<td>用户名</td>
-	<td>电子邮件</td>
-	<td>年龄</td>
-	<td>注册时间</td>
-</tr>
-{{range $k,$v:= .Lists}}
-   <tr>	
-        <td>{{$v.id}}</td>
-        <td>{{$v.username}}</td>
-		<td>{{$v.email}}</td>
-		<td>{{$v.age}}</td>
-		<td>{{$v.reg_date}}</td>
-    </tr>
-{{end}}
-</table>
+<h1>注册</h1>
+ <form action="/register/" method="post">
+Username:<input type="text" name="username" /><br />
+E-mail: <input type="email" name="email" /><br />
+Age: <input type="text" name="age"/><br />
+<input type="submit" value="提交注册"/>
+</form>
+ 
 </body>
 </html>

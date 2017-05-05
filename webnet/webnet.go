@@ -10,8 +10,9 @@ import (
 
 var (
 	routes = map[string]func(rw http.ResponseWriter, req *http.Request){
-		"/":      action.Index,
-		"/admin": action.Admin,
+		"/":         action.Index,
+		"/admin":    action.Admin,
+		"/register": action.Register,
 	}
 )
 

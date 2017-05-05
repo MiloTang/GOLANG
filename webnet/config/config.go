@@ -6,7 +6,7 @@ import (
 
 const Host = "127.0.0.1:3306"
 const Username = "root"
-const Passwd = ""
+const Passwd = "milo2007"
 const Database = "test"
 const Charset = "utf8"
 
