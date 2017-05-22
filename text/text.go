@@ -1,13 +1,15 @@
 package main
 
 import (
-	"crypto/md5"
 	"encoding/xml"
 	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
+	"unsafe"
 )
+
+const N int16 = int16(unsafe.Sizeof(0))
 
 var (
 	sstr = "show me show me again,it's me"
@@ -20,6 +22,23 @@ type person struct {
 }
 
 func main() {
+	var x int16 = 0x1122
+	p := unsafe.Pointer(&x)
+	fmt.Println(p, N)
+	p2 := (*[N]byte)(p)
+	fmt.Println(p2[0], p2[1])
+	if p2[0] == 17 {
+		fmt.Println("本机器：大端")
+	} else {
+		fmt.Println("本机器：小端")
+	}
+	var xx int16
+	var xa, xb byte
+	xx = 0x1122
+	xa = (*[N]byte)(unsafe.Pointer(&xx))[0]
+	xb = (*[N]byte)(unsafe.Pointer(&xx))[1]
+	fmt.Println(xa)
+	fmt.Println(xb)
 	Contains()
 	Count()
 	Index()

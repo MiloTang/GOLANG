@@ -1,0 +1,8 @@
+CREATE TABLE guests
+(
+id int(6) AUTO_INCREMENT NOT NULL PRIMARY KEY,
+username varchar(30),
+email varchar(30),
+age int(3),
+reg_date datetime NOT NULL DEFAULT NOW()
+)ENGINE=InnoDB DEFAULT CHARSET utf8 COLLATE utf8_general_ci;

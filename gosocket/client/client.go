@@ -6,15 +6,19 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 )
 
 func init() {
 
 }
 func main() {
+
 	for {
-		fmt.Println("please enter:")
 		conn, err := net.Dial("tcp", "127.0.0.1:6001")
+		defer conn.Close()
+		fmt.Println("please enter:")
+
 		if err != nil {
 			log.Fatal(err)
 			os.Exit(1)
@@ -23,12 +27,18 @@ func main() {
 		line, err := in.ReadString('\n')
 		if err != nil {
 			log.Fatal(err)
-			os.Exit(1)
+			return
 		}
-		fmt.Fprintf(conn, line)
+		trimmedline := strings.Trim(line, "\r\n")
+		if trimmedline == "Q" {
+			return
+		} else {
+			fmt.Fprintf(conn, line)
+		}
 		data, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			return
 		}
 		fmt.Printf("%v\n", data)
 	}

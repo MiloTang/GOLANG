@@ -41,12 +41,26 @@ var (
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
+	show(w, r)
+	fmt.Println(r.URL)
 	titles := []Context{}
 	titles = bloglists(titles, "blog")
 	p.Title = "Milo Blog"
 	p.Lists = titles
 	t, _ := template.ParseFiles("index.html")
 	t.Execute(w, p)
+}
+func onboot(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("bootstrap.html")
+	t.Execute(w, nil)
+}
+func show(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("show.html")
+	t.Execute(w, nil)
+}
+func layoutit(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("layoutit.html")
+	t.Execute(w, nil)
 }
 func editor(w http.ResponseWriter, r *http.Request) {
 	csid := startcs(w, r, "editor")
@@ -291,6 +305,9 @@ func main() {
 	cs = gocs.NewCookieSession()
 	http.Handle("/css/", http.FileServer(http.Dir("static")))
 	http.Handle("/js/", http.FileServer(http.Dir("static")))
+	http.Handle("/images/", http.FileServer(http.Dir("static")))
+	http.Handle("/bootstrap/", http.FileServer(http.Dir("static")))
+	http.Handle("/layoutitlib/", http.FileServer(http.Dir("static")))
 	http.Handle("/wysiwyg/", http.FileServer(http.Dir("static")))
 	http.Handle("/fonts/", http.FileServer(http.Dir("static")))
 	http.HandleFunc("/", index)
@@ -298,6 +315,8 @@ func main() {
 	http.HandleFunc("/formlogin/", formlogin)
 	http.HandleFunc("/delsession/", delsession)
 	http.HandleFunc("/editor/", editor)
+	http.HandleFunc("/onboot/", onboot)
+	http.HandleFunc("/layoutit/", layoutit)
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

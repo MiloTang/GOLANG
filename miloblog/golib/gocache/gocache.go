@@ -1,0 +1,5 @@
+package gocache
+
+func Cache() {
+
+}

@@ -176,6 +176,9 @@ $(document).ready(function(){
 $("#getcon").click(function(){
   var $title=$("#arttitle").val();
   var $content=$("#editor").html();
+   alert($content);
+
+   return;	
    $.ajax({            
             //提交数据的类型 POST GET
 			type:"POST",

